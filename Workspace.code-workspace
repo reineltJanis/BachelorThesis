@@ -4,13 +4,12 @@
 			"path": "API\\ACAMonitor"
 		},
 		{
-			"path": "Simulation"
-		},
-		{
 			"path": "Webpage"
 		},
 		{
-			"name": "BachelorThesis",
+			"path": "ACNetwork"
+		},
+		{
 			"path": "."
 		}
 	],
