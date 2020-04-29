@@ -6,17 +6,11 @@ verify_ssl = true
 [dev-packages]
 pylint = "*"
 rope = "*"
+v = {editable = true,version = "*"}
 
 [packages]
 timeloop = "*"
 numpy = "*"
-scipy = "*"
-matplotlib = "*"
-ipython = "*"
-jupyter = "*"
-pandas = "*"
-sympy = "*"
-nose = "*"
 requests = "*"
 
 [requires]
