@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace ACAMonitor.Models
+namespace ACMonitor.Models
 {
     public class SigmaDataEdge
     {

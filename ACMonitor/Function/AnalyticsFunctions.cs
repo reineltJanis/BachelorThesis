@@ -1,6 +1,6 @@
-using ACAMonitor.Extensions;
-using ACAMonitor.Models;
-using ACAMonitor.Services;
+using ACMonitor.Extensions;
+using ACMonitor.Models;
+using ACMonitor.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Cosmos;
@@ -18,7 +18,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace ACAMonitor.Function
+namespace ACMonitor.Function
 {
     public class AnalyticsFunctions
     {
@@ -29,7 +29,7 @@ namespace ACAMonitor.Function
             )
         {
             _logContainer = cosmosClient
-                .GetDatabase("ACAMonitor")
+                .GetDatabase("ACMonitor")
                 .GetContainer("Logs");
         }
 

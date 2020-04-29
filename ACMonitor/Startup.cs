@@ -6,8 +6,8 @@ using System;
 using System.Threading;
 using Microsoft.Azure.Cosmos;
 
-[assembly: FunctionsStartup(typeof(ACAMonitor.Startup))]
-namespace ACAMonitor
+[assembly: FunctionsStartup(typeof(ACMonitor.Startup))]
+namespace ACMonitor
 {
     public class Startup : FunctionsStartup
     {
@@ -25,8 +25,8 @@ namespace ACAMonitor
                 .WithBulkExecution(true)
                 .Build();
 
-                client.CreateDatabaseIfNotExistsAsync("ACAMonitor").Wait();
-                var db = client.GetDatabase("ACAMonitor");
+                client.CreateDatabaseIfNotExistsAsync("ACMonitor").Wait();
+                var db = client.GetDatabase("ACMonitor");
                 db.CreateContainerIfNotExistsAsync(new ContainerProperties{ PartitionKeyPath="/networkId", DefaultTimeToLive=1200, Id="Logs"}).Wait();
 
                 return client;

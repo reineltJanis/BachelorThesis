@@ -2,7 +2,7 @@
 using System;
 using System.Text.Json.Serialization;
 
-namespace ACAMonitor.Models
+namespace ACMonitor.Models
 {
     public class LogEntryStackDocument : LogEntryStack
     {

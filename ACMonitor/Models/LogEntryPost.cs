@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Text;
 using System.Text.Json.Serialization;
 
-namespace ACAMonitor.Models
+namespace ACMonitor.Models
 {
     public class LogEntry
     {

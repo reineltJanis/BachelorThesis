@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace ACAMonitor.Services
+namespace ACMonitor.Services
 {
     public static class StatisticCalculator
     {

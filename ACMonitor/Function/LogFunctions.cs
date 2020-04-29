@@ -9,12 +9,12 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Azure.Cosmos;
-using ACAMonitor.Models;
+using ACMonitor.Models;
 using System.Collections.Generic;
 using System.Threading;
 using System.Linq;
 
-namespace ACAMonitor.Function
+namespace ACMonitor.Function
 {
     public class LogFunctions
     {
@@ -22,7 +22,7 @@ namespace ACAMonitor.Function
 
         public LogFunctions(CosmosClient cosmosClient)
         {
-            _logContainer = cosmosClient.GetDatabase("ACAMonitor").GetContainer("Logs");
+            _logContainer = cosmosClient.GetDatabase("ACMonitor").GetContainer("Logs");
         }
 
         [FunctionName("StoreDataStackAsync")]
