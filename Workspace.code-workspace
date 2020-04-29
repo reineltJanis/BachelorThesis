@@ -1,0 +1,21 @@
+{
+	"folders": [
+		{
+			"path": "API\\ACAMonitor"
+		},
+		{
+			"path": "Simulation"
+		},
+		{
+			"path": "Webpage"
+		},
+		{
+			"name": "BachelorThesis",
+			"path": "."
+		}
+	],
+	"settings": {
+		"debug.internalConsoleOptions": "neverOpen",
+		"liveServer.settings.multiRootWorkspaceName": "Webpage"
+	}
+}

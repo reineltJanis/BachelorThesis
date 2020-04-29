@@ -27,7 +27,7 @@ namespace ACAMonitor
 
                 client.CreateDatabaseIfNotExistsAsync("ACAMonitor").Wait();
                 var db = client.GetDatabase("ACAMonitor");
-                db.CreateContainerIfNotExistsAsync(new ContainerProperties{ PartitionKeyPath="/newtorkId", DefaultTimeToLive=1200, Id="Logs"}).Wait();
+                db.CreateContainerIfNotExistsAsync(new ContainerProperties{ PartitionKeyPath="/networkId", DefaultTimeToLive=1200, Id="Logs"}).Wait();
 
                 return client;
             });
