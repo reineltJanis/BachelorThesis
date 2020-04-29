@@ -1,0 +1,30 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: Alg.2 Main File",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/algorithm2/main.py",
+            "console": "integratedTerminal",
+            "args": ["run-1-1-n50.csv", "-c", "../config/config1-n5.json", "-e", "-en", "1", "-ei", "1"],
+            "cwd": "${workspaceFolder}/algorithm2"
+        },
+        {
+            "name": "Python: Alg.1 Main File",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/algorithm1/main.py",
+            "console": "integratedTerminal",
+            "args": ["run-1-1-n15.csv","-c", "../config/config1-n15.json", "-e", "-en", "0", "-ei", "1"],
+            "cwd": "${workspaceFolder}/algorithm1"
+        },
+        {
+            "name": "Python: Current File",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal"
+        }
+    ]
+}

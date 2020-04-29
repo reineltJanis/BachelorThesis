@@ -1,0 +1,19 @@
+{
+    "files.exclude": {
+        "**/.git": true,
+        "**/.svn": true,
+        "**/.hg": true,
+        "**/CVS": true,
+        "**/.DS_Store": true,
+        "**/*.pyc": true,
+        "**/__pycache__": true
+    },
+    "python.pythonPath": "/home/test/.local/share/virtualenvs/algorithm1-vRriijlu/bin/python3",
+    "[python]": {
+        "editor.defaultFormatter": "iansan5653.format-python-docstrings"
+    }
+    // "python.venvFolders": ["/home/test/.local/share/virtualenvs"],
+    // whitelist numpy to remove lint errors
+    // "python.linting.pylintArgs": [
+    //     "--extension-pkg-whitelist=numpy"
+    // ]
