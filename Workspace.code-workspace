@@ -1,20 +1,13 @@
 {
 	"folders": [
 		{
-			"path": "API\\ACAMonitor"
+			"path": "ACMonitor"
 		},
 		{
 			"path": "Webpage"
 		},
 		{
 			"path": "ACNetwork"
-		},
-		{
-			"path": "."
 		}
-	],
-	"settings": {
-		"debug.internalConsoleOptions": "neverOpen",
-		"liveServer.settings.multiRootWorkspaceName": "Webpage"
-	}
+	]
 }
