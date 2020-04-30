@@ -143,9 +143,9 @@ if __name__ == "__main__":
         os.makedirs(RESULT_PATH, exist_ok=True)
         outpath = os.path.join(RESULT_PATH, 'res-' + FILENAME)
         np.savetxt(outpath, log_matrix, delimiter=',')
-        times = open(os.path.join(RESULT_PATH, 'times.csv'), 'a')
-        times.write(FILENAME + ', ' + str(end_time - start_time) + '\n')
-        times.close()
+    times = open(os.path.join(RESULT_PATH, 'times.csv'), 'a')
+    times.write(FILENAME + ', ' + str(end_time - start_time) + ', ' + str(timer() - end_time) + '\n')
+    times.close()
 
     print('\n\n\n') # print final results
     print(f"Real:\t{u}\t = {np.average(u)}")
