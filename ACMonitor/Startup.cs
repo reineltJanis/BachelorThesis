@@ -3,7 +3,6 @@ using Microsoft.Azure.Functions.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
-using System.Threading;
 using Microsoft.Azure.Cosmos;
 
 [assembly: FunctionsStartup(typeof(ACMonitor.Startup))]

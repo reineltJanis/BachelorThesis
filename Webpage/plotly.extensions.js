@@ -1,6 +1,6 @@
 function updateTrace(div, traces, lastIterations) {
   if (typeof div === "string") div = document.getElementById(div);
-
+  console.log(lastIterations)
   if (!div.data) {
     if (traces) {
       Plotly.newPlot(div, traces);

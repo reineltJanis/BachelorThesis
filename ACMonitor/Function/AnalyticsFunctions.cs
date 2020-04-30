@@ -82,19 +82,23 @@ namespace ACMonitor.Function
                 .Select(o => new PlotyTrace { name = o.Key, x = o.ToList().Select(k => (double)k.Iteration).ToList(), y = o.ToList().Select(s => s.State).ToList(), line = new PlotTraceLine { width = 1 }, type = "scatter" })
                 .ToList();
 
-            var averages = logEntries
-                .Where(o => o.Iteration <= traces.Select(t => t.x.Max()).Min())
+            // var averages = logEntries
+            //     .Where(o => o.Iteration <= traces.Select(t => t.x.Max()).Min())
+            //     .Where(o => o.Iteration > (continueAtIteration.ContainsKey("average") ? continueAtIteration["average"] : -1))
+            //     .GroupBy(o => o.Iteration)
+            //     .OrderBy(o => o.Key)
+            //     .Select(o => Tuple.Create((double)o.Key, o.ToList().Select(s => s.ReferenceSignal).ToList().Average()))
+            //     .ToList();
+
+            var maxIterations = continueAtIteration;
+            traces
+                .ForEach(t => maxIterations[t.name] = (int)t.x.Max());
+
+            var statistics = documents
+                .SelectMany(o => o.LogEntries)
+                // .Where(o => o.Iteration < traces.Select(t => KeyValuePair.Create(t.name, (int)t.x.Max())).Union(continueAtIteration.Where(h => h.Key!="average")).Min(t => t.Value))
+                .Where(o => o.Iteration <= maxIterations.Where(t => t.Key != "average").Min(t => t.Value))
                 .Where(o => o.Iteration > (continueAtIteration.ContainsKey("average") ? continueAtIteration["average"] : -1))
-                .GroupBy(o => o.Iteration)
-                .OrderBy(o => o.Key)
-                .Select(o => Tuple.Create((double)o.Key, o.ToList().Select(s => s.ReferenceSignal).ToList().Average()))
-                .ToList();
-
-            if (averages.Count > 0)
-                traces.Insert(0, new PlotyTrace { name = "average", x = averages.Select(o => o.Item1).ToList(), y = averages.Select(o => o.Item2).ToList() });
-
-            var statistics = logEntries
-                .Where(o => o.Iteration < averages.Max(a => a.Item1))
                 .GroupBy(o => o.Iteration)
                 .OrderBy(o => o.Key)
                 .Select(o =>
@@ -129,6 +133,13 @@ namespace ACMonitor.Function
                     };
                 })
                 .ToList();
+            if (statistics.Count > 0)
+                traces.Insert(0, new PlotyTrace
+                {
+                    name = "average",
+                    x = statistics.Select(o => (double)o.Iteration).ToList(),
+                    y = statistics.Select(o => o.Average).ToList()
+                });
 
             var lastIterations = continueAtIteration;
             traces.ForEach(o => lastIterations[o.name] = (int)o.x.Max());

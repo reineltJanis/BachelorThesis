@@ -8,7 +8,7 @@
         "**/*.pyc": true,
         "**/__pycache__": true
     },
-    "python.pythonPath": "/home/test/.local/share/virtualenvs/ACNetwork-RknXuYe0/bin/python3",
+    "python.pythonPath": "C:\\Users\\Janis\\.virtualenvs\\ACNetwork-UchM_s8e\\Scripts\\python.exe",
     "[python]": {
         "editor.defaultFormatter": "iansan5653.format-python-docstrings"
     }

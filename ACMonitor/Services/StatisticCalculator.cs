@@ -28,9 +28,16 @@ namespace ACMonitor.Services
             var max = states.Max();
             var min = states.Min();
 
-            var diff = 2 * (max - min) / (max + min);
+            if (max+min == 0 || max-min == 0)
+                return 0;
 
-            return Math.Abs(diff);
+            var diff = Math.Abs((max - min) / (max + min));
+            
+            diff = diff <= 1 ? diff : Math.Pow(diff,-1); // Invert if max > 0 and min <0
+            
+            diff *=200;
+
+            return diff;
         }
 
         public static double CalculatePercentDifferenceMedianMean(params double[] states)

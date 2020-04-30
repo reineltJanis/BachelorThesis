@@ -1,3 +1,4 @@
 requests
+matplotlib
 numpy==1.18.1
 timeloop==1.0.2
