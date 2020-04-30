@@ -64,6 +64,7 @@ class Server(Process):
         self.__stopped = Event()
         
         self.__API_URL = 'http://10.0.2.2:7071'
+        # self.__API_URL = 'https://acmonitor.azurewebsites.net'
         self.__NETWORK_ID = network_id
         self.__API_QUEUE = manager.list()
         self.__API_QUEUE_LOCK = Lock()
