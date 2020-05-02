@@ -129,7 +129,7 @@ namespace ACMonitor.Function
                         Average = avgRef,
                         Error = StatisticCalculator.CalculatePercentError(avgState, avgRef),
                         Difference = Math.Abs(maxState) + Math.Abs(minState) > 0 ? StatisticCalculator.CalculatePercentDifferencePeak(o.ToList().Select(r => r.State).ToArray()) : 0,
-                        ConvergenceRate = convergenceIterations.Count > 0 ? convergenceIterations.Average(c => c.ConvergenceRate) : -1
+                        ConvergenceRate = convergenceIterations.Count > 0 ? convergenceIterations.Average(c => c.ConvergenceRate) : double.NaN
                     };
                 })
                 .ToList();
@@ -163,8 +163,8 @@ namespace ACMonitor.Function
             statisticTraces.Add(new PlotyTrace
             {
                 name = "Convergence",
-                x = statistics.Where(s => s.ConvergenceRate > 0).Select(s => (double)s.Iteration).ToList(),
-                y = statistics.Where(s => s.ConvergenceRate > 0).Select(s => s.ConvergenceRate).ToList()
+                x = statistics.Where(s => !double.IsNaN(s.ConvergenceRate)).Select(s => (double)s.Iteration).ToList(),
+                y = statistics.Where(s => !double.IsNaN(s.ConvergenceRate)).Select(s => s.ConvergenceRate).ToList()
             });
 
 
