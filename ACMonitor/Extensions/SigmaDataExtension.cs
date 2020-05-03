@@ -14,14 +14,17 @@ namespace ACMonitor.Extensions
             return logEntryPosts.ToList().ToSigmaData();
         }
 
-        public static SigmaData ToSigmaData(this IEnumerable<LogEntry> logEntryPosts)
+        public static SigmaData ToSigmaData(this IEnumerable<LogEntry> logEntries)
         {
-            var data = logEntryPosts.ToList();
+            var data = logEntries.ToList();
 
             var activeNodes = data.Select(i => i.NodeId);
 
             var neighborNodes = new SortedSet<string>();
             var edges = new HashSet<Tuple<string, string>>();
+
+            var errorNodes = new SortedSet<string>();
+
             data.ForEach(i =>
             {
                 neighborNodes.UnionWith(i.NeighborStates.Keys);
@@ -29,6 +32,18 @@ namespace ACMonitor.Extensions
                     i.NeighborStates.Select(
                         ns =>
                         {
+                            // for error set
+                            data.ForEach(j =>
+                            {
+                                if (i.Iteration - 1 == j.Iteration && ns.Key.Equals(j.NodeId))
+                                {
+                                    if (Math.Abs(1 - ns.Value / j.State) > 0.0001){
+                                        errorNodes.Add(j.NodeId);
+                                        Console.WriteLine($"ERROR ===============================> {j.NodeId}({j.Iteration}): {j.State} <-> {i.State} :({i.Iteration}){ns.Key}");
+                                    }
+                                }
+                            });
+
                             var lst = new List<string>();
                             lst.Add(i.NodeId);
                             lst.Add(ns.Key);
@@ -43,6 +58,8 @@ namespace ACMonitor.Extensions
             allNodes.UnionWith(activeNodes);
             allNodes.UnionWith(neighborNodes);
 
+            var untrackedNeighbors = neighborNodes.Except(activeNodes);
+
             var allNodesList = allNodes.ToList();
 
             var rand = new Random();
@@ -56,7 +73,8 @@ namespace ACMonitor.Extensions
                         Label = n,
                         Size = edges.Where(e => (e.Item1 == n || e.Item2 == n)).Count() * 3,
                         X = allNodesList.IndexOf(n),
-                        Y = allNodesList.IndexOf(n) ^ 2
+                        Y = allNodesList.IndexOf(n) ^ 2,
+                        Color = untrackedNeighbors?.Contains(n) == true ? "grey" : (errorNodes.Contains(n) ? "red" : "green")
                     }
                     ).ToList() ?? new List<SigmaDataNode>(),
 
@@ -64,14 +82,15 @@ namespace ACMonitor.Extensions
                     e => new SigmaDataEdge
                     {
                         Source = e.Item1,
-                        Target = e.Item2
+                        Target = e.Item2,
+                        Color = "grey"
                     }).ToList() ?? new List<SigmaDataEdge>()
             };
 
             return sigmadata;
         }
 
-        
+
 
         //private string DetermineColor(List<LogEntryStack> allStacks)
         //{
@@ -97,7 +116,7 @@ namespace ACMonitor.Extensions
         //                    return new AnalyzedDataEntryFlagData { FromNode = o.Key, ErrorType = AnalyzedDataEntryFlagData.MISSING_NODE };
         //                });
         //    });
-                        
+
         //}
     }
 }
