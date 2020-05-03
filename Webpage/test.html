@@ -23,8 +23,8 @@
     <div id="container"></div>
 
     <script>
-        // const API_BASE_ADDRESS = 'https://acmonitor.azurewebsites.net/api/'
-        const API_BASE_ADDRESS = 'http://localhost:7071/api/'
+        const API_BASE_ADDRESS = 'https://acmonitor.azurewebsites.net/api/'
+        // const API_BASE_ADDRESS = 'http://localhost:7071/api/'
 
 
         let div = document.getElementById('chart3');
@@ -115,7 +115,9 @@
             if (!div || !data.nodes.length) {
                 if( div.sigInstance){
                     div.sigInstance.graph.clear();
+                    div.sigInstance.refresh();
                 }
+                return;
              }
 
             if (!div.sigInstance) {
@@ -135,7 +137,7 @@
                 });
 
                 div.sigInstance.startForceAtlas2({ worker: true, barnesHutOptimize: false });
-                setTimeout(() => div.sigInstance.stopForceAtlas2(), 200);
+                setTimeout(() => div.sigInstance.stopForceAtlas2(), 800);
                 return;
             }
 
@@ -177,7 +179,7 @@
             
             if (addedStuff) {
                 div.sigInstance.startForceAtlas2({ worker: true, barnesHutOptimize: false });
-                setTimeout(() => div.sigInstance.stopForceAtlas2(), 200)
+                setTimeout(() => div.sigInstance.stopForceAtlas2(), 800)
             }
 
 
