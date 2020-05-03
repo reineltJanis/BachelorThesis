@@ -54,7 +54,7 @@
             }
             performance.mark(markerPlStart);
             div.retrievingData = true;
-            fetch(API_BASE_ADDRESS + 'analytics/plotly/1/400', {
+            fetch(API_BASE_ADDRESS + 'analytics/plotly/1/30', {
                 method: 'post',
                 body: JSON.stringify(div.lastIterations)
             }).then(data => { return data.text(); })
@@ -88,7 +88,7 @@
                 }
                 div.retrievingData = true;
                 performance.mark("sg_start");
-                fetch(API_BASE_ADDRESS + 'analytics/sigma/1/400')
+                fetch(API_BASE_ADDRESS + 'analytics/sigma/1/30')
                     .then(data => data.text())
                     .then(body => {
                         showGraph(div, JSON.parse(body));
@@ -102,7 +102,7 @@
                         }
                     });
                 return x;
-            }(), 10000)
+            }(), 5000)
         }
 
         loadGraph('container');
@@ -112,7 +112,11 @@
             if (typeof div === "string") div = document.getElementById(div);
 
             // console.log(data)
-            if (!div || !data.nodes.length) { return; }
+            if (!div || !data.nodes.length) {
+                if( div.sigInstance){
+                    div.sigInstance.graph.clear();
+                }
+             }
 
             if (!div.sigInstance) {
 
@@ -131,17 +135,58 @@
                 });
 
                 div.sigInstance.startForceAtlas2({ worker: true, barnesHutOptimize: false });
-                setTimeout(() => div.sigInstance.stopForceAtlas2(), 200)
+                setTimeout(() => div.sigInstance.stopForceAtlas2(), 200);
                 return;
             }
 
-            graph = div.sigInstance.graph
-            graph.nodes().forEach(element => {
-                element.size = Math.random() * 20
+            graph = div.sigInstance.graph;
+
+
+            let addedStuff = false;
+            data.nodes.forEach(dataNode => {
+                let nodesWithKey = graph.nodes().filter(node => node['id'] === dataNode['id']);
+                if (nodesWithKey.length) {
+                    let graphNode = nodesWithKey.pop();
+                    graphNode.color = dataNode.color;
+                    graphNode.size = dataNode.size;
+                } else {
+                    graph.addNode(dataNode);
+                    addedStuff = true;
+                }
             });
-            if (div.sigInstance) {
-                setTimeout(() => { div.sigInstance.graph.nodes().filter(node => node['id'] === '127.0.0.2').pop().color = 'red'; div.sigInstance.refresh(); }, 3000);
+
+            data.edges.forEach(dataEdge => {
+                let edgesWithKey = graph.edges().filter(edge => edge['id'] === dataEdge['id']);
+                if (edgesWithKey.length) {
+                    let graphEdge = edgesWithKey.pop();
+                    graphEdge.color = dataEdge.color;
+                    graphEdge.size = dataEdge.size;
+                } else {
+                    graph.addEdge(dataEdge);
+                    addedStuff = true;
+                }
+            });
+
+            graph.nodes().forEach(graphNode => {
+                if(!data.nodes.filter(n => graphNode.id === n.id).length){
+                    graph.dropNode(graphNode.id)
+                }
+            });
+
+            div.sigInstance.refresh();
+            
+            if (addedStuff) {
+                div.sigInstance.startForceAtlas2({ worker: true, barnesHutOptimize: false });
+                setTimeout(() => div.sigInstance.stopForceAtlas2(), 200)
             }
+
+
+            // graph.nodes().forEach(element => {
+            //     element.size = Math.random() * 20
+            // });
+            // if (div.sigInstance) {
+            //     setTimeout(() => { div.sigInstance.graph.nodes().filter(node => node['id'] === '127.0.0.2').pop().color = 'red'; div.sigInstance.refresh(); }, 3000);
+            // }
         }
 
     </script>
