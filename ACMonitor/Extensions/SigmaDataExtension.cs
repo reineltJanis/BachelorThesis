@@ -90,33 +90,5 @@ namespace ACMonitor.Extensions
             return sigmadata;
         }
 
-
-
-        //private string DetermineColor(List<LogEntryStack> allStacks)
-        //{
-        //    var logEntries = allStacks
-        //        .SelectMany(an => an.LogEntries)
-        //        .ToList();
-
-        //    var singleNodes = logEntries
-        //        .GroupBy(le => le.NodeId);
-
-        //    var neighborStates = logEntries
-        //        .SelectMany(le => le.NeighborStates);
-
-        //    logEntries.GroupBy(le => le.Iteration).ToList().ForEach(it =>
-        //    {
-        //        it.ToList()
-        //        .SelectMany(o => o.NeighborStates)
-        //                .Where(o => !singleNodes.Any(r => singleNodes.Any(single => single.Key == o.Key) ))
-        //                .ToList()
-        //                .Select(o =>
-        //                {
-        //                    singleNodes.Add(new AnalyzedDataEntryRawData { NodeId = o.Key, State = o.Value, ReferenceSignal = null });
-        //                    return new AnalyzedDataEntryFlagData { FromNode = o.Key, ErrorType = AnalyzedDataEntryFlagData.MISSING_NODE };
-        //                });
-        //    });
-
-        //}
     }
 }

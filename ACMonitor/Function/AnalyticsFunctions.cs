@@ -82,21 +82,12 @@ namespace ACMonitor.Function
                 .Select(o => new PlotyTrace { name = o.Key, x = o.ToList().Select(k => (double)k.Iteration).ToList(), y = o.ToList().Select(s => s.State).ToList(), line = new PlotTraceLine { width = 1 }, type = "scatter" })
                 .ToList();
 
-            // var averages = logEntries
-            //     .Where(o => o.Iteration <= traces.Select(t => t.x.Max()).Min())
-            //     .Where(o => o.Iteration > (continueAtIteration.ContainsKey("average") ? continueAtIteration["average"] : -1))
-            //     .GroupBy(o => o.Iteration)
-            //     .OrderBy(o => o.Key)
-            //     .Select(o => Tuple.Create((double)o.Key, o.ToList().Select(s => s.ReferenceSignal).ToList().Average()))
-            //     .ToList();
-
             var maxIterations = continueAtIteration;
             traces
                 .ForEach(t => maxIterations[t.name] = (int)t.x.Max());
 
             var statistics = documents
                 .SelectMany(o => o.LogEntries)
-                // .Where(o => o.Iteration < traces.Select(t => KeyValuePair.Create(t.name, (int)t.x.Max())).Union(continueAtIteration.Where(h => h.Key!="average")).Min(t => t.Value))
                 .Where(o => o.Iteration <= maxIterations.Where(t => t.Key != "average").Min(t => t.Value))
                 .Where(o => o.Iteration > (continueAtIteration.ContainsKey("average") ? continueAtIteration["average"] : -1))
                 .GroupBy(o => o.Iteration)

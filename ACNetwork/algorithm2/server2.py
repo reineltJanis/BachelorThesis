@@ -184,10 +184,6 @@ class Server(Process):
         ''' Gets called by the Timeloop class. Creates a Thread which handles computation of new state and broadcasting. '''
         try:
             if self._j.k() < self.__max_iterations:
-                # logging.getLogger(name='Server:broadcast').info("broadcast job current time: %s with data: %s" % (time.ctime(), str(self._neighbor_states)))
-                # thread = Thread(target=self.broadcast_thread) #, args=(self._j, self._neighbor_states, self._adjacency)
-                # thread.daemon = True
-                # thread.start()
                 self.broadcast_thread()
             else:
                 self.stop()
@@ -456,7 +452,6 @@ if __name__ == "__main__":
     API = True if args.api_log !=None else False
     API_ADDRESS = args.api_log
     # API_ADDRESS = 'http://10.0.2.2:7071'
-    # API_ADDRESS = 'https://acmonitor.azurewebsites.net'
     NODES = len(configs)
     INTERVAL = args.interval
     DATAFILE = Path(args.datafile)
