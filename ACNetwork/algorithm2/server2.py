@@ -1,4 +1,4 @@
-import random, logging, sys, struct, json, errno, time, decimal, utility, csv, requests
+import random, logging, sys, struct, json, errno, time, decimal, utility, csv, requests, argparse
 import numpy as np
 from j import J
 from socket import AF_INET, socket, SOCK_STREAM, SOL_SOCKET, SO_REUSEADDR
@@ -8,10 +8,12 @@ from job import Job
 from datetime import timedelta
 from config import Config
 from datetime import datetime
+from pathlib import Path
+
 
 @utility.auto_str
 class Server(Process):
-    def __init__(self, config: Config, signals: np.ndarray, output = None, interval = 1000, new_reference_signal_each_k = 5, max_iterations = 1200, max_retries = 10, beta = 1.0, error_on = False, error_start = 0, error_duration = 10, manager = None, network_id = '1'):
+    def __init__(self, config: Config, signals: np.ndarray, output = None, interval = 1000, new_reference_signal_each_k = 5, max_iterations = 1200, max_retries = 10, beta = 1.0, error_on = False, error_start = 0, error_duration = 10, manager = None, network_id = '1', use_api=True, api_address=None):
         """
             Creates a Server object using:
             str:host\t host address
@@ -62,12 +64,11 @@ class Server(Process):
         self.__error_start = error_start
         self.__error_duration = error_duration
         self.__stopped = Event()
-        
-        self.__API_URL = 'http://10.0.2.2:7071'
-        # self.__API_URL = 'https://acmonitor.azurewebsites.net'
+        self.__API_URL = api_address
         self.__NETWORK_ID = network_id
         self.__API_QUEUE = manager.list()
         self.__API_QUEUE_LOCK = Lock()
+        self.use_api = use_api
         
         self.__tl = None 
         if config.instant_start:
@@ -83,26 +84,26 @@ class Server(Process):
 
             self.accept_thread = Thread(target=self.accept_connections)
             self.accept_thread.daemon = True
-            self.api_thread = Thread(target=self.call_api_job, args=(timedelta(milliseconds=2000),))
-            self.api_thread.daemon = True
-
-            # add initial to api queue
-            with self.__API_QUEUE_LOCK:
-                self.__API_QUEUE.append(
-                    {
-                        'nodeId': self._host,
-                        'port': self._port,
-                        'state': self._j.reference_signal(),
-                        'neighborStates': {},
-                        'iteration': '0',
-                        'timestamp': datetime.utcnow().__str__(),
-                        'networkId': self.__NETWORK_ID,
-                        'referenceSignal': self._j.reference_signal()
-                    }
-                )
-
+            if self.use_api:
+                self.api_thread = Thread(target=self.call_api_job, args=(timedelta(milliseconds=2000),))
+                self.api_thread.daemon = True
+                # add initial to api queue
+                with self.__API_QUEUE_LOCK:
+                    self.__API_QUEUE.append(
+                        {
+                            'nodeId': self._host,
+                            'port': self._port,
+                            'state': self._j.reference_signal(),
+                            'neighborStates': {},
+                            'iteration': '0',
+                            'timestamp': datetime.utcnow().__str__(),
+                            'networkId': self.__NETWORK_ID,
+                            'referenceSignal': self._j.reference_signal()
+                        }
+                    )
+                
+                self.api_thread.start()
             self.accept_thread.start()
-            self.api_thread.start()
 
             while not self.__stopped.wait(self._interval_sec):
                 self.broadcast()
@@ -110,12 +111,14 @@ class Server(Process):
             if self.__output != None:
                 self.__output.close()
 
-            self.api_thread.join()
 
-            # To empyt the queue and send all data to the api
-            self.call_api()
+            if self.use_api:
+                self.api_thread.join()
+
+                # To empyt the queue and send all data to the api
+                self.call_api()
             
-            self.accept_thread.join(5)
+            self.accept_thread.join(1)
             
         except BaseException as e:
             logging.getLogger(name='start').error(str(e))
@@ -284,20 +287,21 @@ class Server(Process):
         self.distribute_states(state_x=x_new)
         logger.debug(f" UPDATED: Node {self._id}: {self._j.state()} | Others: {self._neighbor_states}")
 
-        # add log to api queue
-        with self.__API_QUEUE_LOCK:
-            self.__API_QUEUE.append(
-                {
-                    'nodeId': self._host,
-                    'port': self._port,
-                    'state': float(np.real(x_new)),
-                    'neighborStates': current_neighbor_states,
-                    'iteration': self._j.k(),
-                    'timestamp': datetime.utcnow().__str__(),
-                    'networkId': self.__NETWORK_ID,
-                    'referenceSignal': self._j.reference_signal()
-                }
-            )
+        if self.use_api:
+            # add log to api queue
+            with self.__API_QUEUE_LOCK:
+                self.__API_QUEUE.append(
+                    {
+                        'nodeId': self._host,
+                        'port': self._port,
+                        'state': float(np.real(x_new)),
+                        'neighborStates': current_neighbor_states,
+                        'iteration': self._j.k(),
+                        'timestamp': datetime.utcnow().__str__(),
+                        'networkId': self.__NETWORK_ID,
+                        'referenceSignal': self._j.reference_signal()
+                    }
+                )
 
         # log to output if specified
         if self.__output != None:
@@ -413,3 +417,91 @@ class Server(Process):
         except requests.exceptions.RequestException as re:
             logging.getLogger(name='callApi: ').error(re)
 
+
+
+
+if __name__ == "__main__":
+    '''Single creation of an agent running algorithm 2. see parser for more ionformation.'''
+    # logging.basicConfig(filename='output.log', level=logging.DEBUG) # allows debugging to a file
+    logger = logging.getLogger()
+    logger.setLevel(logging.WARN)
+
+    np.seterr('raise')
+
+    parser = argparse.ArgumentParser(description=f"Run agent with the robust dynamic average consensus algorithm.")
+    parser.add_argument("id", type=int, help="Id of the agent within the configuration file starting with 0.")
+    parser.add_argument("host", help="Host address of the agent")
+    parser.add_argument("port", help="Port of the agent")
+    parser.add_argument("datafile", help="Path to the data file.")
+    parser.add_argument('-c', '--config', default='../config/config1-n5.json', help='Config file.' )
+    parser.add_argument('-it', '--iterations', type=int, default=1200, help="Number of iterations until the agent stops.")
+    parser.add_argument('--new-signal', type=int, default=5, help="Specified number defines at which n-th iteration a new signal gets read.")
+    parser.add_argument('-i', '--interval', type=int, default=10, help='Specifies the delay or wait interval between each computation in ms.')
+    parser.add_argument('-d', '--delta', type=int, default=1.1, help='Delta used for convergence control')
+    parser.add_argument('-fl', '--file-log', default=None, help='Turns on logging to a file and specifies the path and name of the logfile.')
+    api_parser = parser.add_argument_group('api')
+    api_parser.add_argument('-api', '--api-log', default=None, help='Turns on logging to an api and specifies the base url to the api.')
+    api_parser.add_argument('-ai', '--api-interval', type=int, default=3000, help='Specifies another time interval the api gets called in ms.')
+    api_parser.add_argument('-an', '--api-network', default='1', help='Specifies the network id used by the api.')
+    error_group = parser.add_argument_group('error')
+    error_group.add_argument('-e', '--error-on', action='store_true', default=False, help='If set, error will be used on given node.')
+    error_group.add_argument('-en', '--error-node-id', type=int, default=0, action='store', help='Node id, where the error occurs.')
+    error_group.add_argument('-ei', '--error-start-index', type=int, default=1, action='store', help='Start at reference signal x.')
+
+    args = parser.parse_args()
+
+    configs = Config.load(args.config)
+    
+    LOGGING = True if args.file_log != None else False 
+    API = True if args.api_log !=None else False
+    API_ADDRESS = args.api_log
+    # API_ADDRESS = 'http://10.0.2.2:7071'
+    # API_ADDRESS = 'https://acmonitor.azurewebsites.net'
+    NODES = len(configs)
+    INTERVAL = args.interval
+    DATAFILE = Path(args.datafile)
+    MAX_ITERATIONS = args.iterations
+    
+    output = None
+    if args.file_log != None:
+        log_file = Path(args.log_file)
+        log_file.parent.mkdir()
+        output = open(log_file.absolute(), 'w+')
+
+    NETWORK_ID = args.api_network
+
+    if not DATAFILE.exists():
+        logger.error('Datafile not found.')
+        sys.exit()
+
+
+    #load dataset
+    signals = np.loadtxt(DATAFILE.absolute(), usecols=[args.id], delimiter=",")
+    
+    u = np.resize(signals[-1], NODES)
+
+    
+
+    manager = Manager()
+
+    i = args.id
+
+    agent = Server(
+        configs[i],
+        signals,
+        output,
+        INTERVAL,
+        args.new_signal,
+        MAX_ITERATIONS,
+        beta=args.delta,
+        error_on=args.error_on,
+        error_start=args.error_start_index,
+        error_duration=10,
+        max_retries=NODES*4,
+        manager=manager,
+        network_id=NETWORK_ID,
+        use_api=API,
+        api_address=API_ADDRESS)
+    agent.daemon = True
+    agent.start()
+    agent.join()

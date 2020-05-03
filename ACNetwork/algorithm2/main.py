@@ -61,6 +61,9 @@ if __name__ == "__main__":
     configs = Config.load(args.config)
     
     LOGGING = False
+    API = not LOGGING
+    API_ADDRESS = 'http://10.0.2.2:7071'
+    # API_ADDRESS = 'https://acmonitor.azurewebsites.net'
     NODES = len(configs)
     INTERVAL = 10
     DATAPATH = '../data/'
@@ -101,7 +104,21 @@ if __name__ == "__main__":
             error = False
             if args.error_on and i == args.error_node_id:
                 error = True
-            servers.append(Server(configs[i], signals_on_node, outputs[i], INTERVAL, 5, MAX_ITERATIONS, beta=1.1, error_on=error, error_start=args.error_start_index, error_duration=10, max_retries=NODES*4, manager=manager, network_id=NETWORK_ID))
+            servers.append(Server(
+                configs[i],
+                signals_on_node,
+                outputs[i],
+                INTERVAL,
+                5,
+                MAX_ITERATIONS,
+                beta=1.1,
+                error_on=error,
+                error_start=args.error_start_index,
+                error_duration=10, max_retries=NODES*4,
+                manager=manager,
+                network_id=NETWORK_ID,
+                use_api=API,
+                api_address=API_ADDRESS))
 
         start_time = None
         end_time = None

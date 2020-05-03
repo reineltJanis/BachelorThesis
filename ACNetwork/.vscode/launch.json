@@ -7,7 +7,7 @@
             "request": "launch",
             "program": "${workspaceFolder}/algorithm2/main.py",
             "console": "integratedTerminal",
-            "args": ["run-1-1-n50.csv", "-c", "../config/config1-n5.json", "-e", "-en", "1", "-ei", "1"],
+            "args": ["run-2-4-n50.csv", "-c", "../config/config1-n5.json", "-e", "-en", "1", "-ei", "800"],
             "cwd": "${workspaceFolder}/algorithm2"
         },
         {
@@ -16,7 +16,22 @@
             "request": "launch",
             "program": "${workspaceFolder}/algorithm1/main.py",
             "console": "integratedTerminal",
-            "args": ["run-1-1-n15.csv","-c", "../config/config1-n15.json", "-e", "-en", "0", "-ei", "1"],
+            "args": ["run-1-1-n50.csv","-c", "../config/config1-n15.json", "-e", "-en", "0", "-ei", "1"],
+            "cwd": "${workspaceFolder}/algorithm1"
+        },
+        {
+            "name": "Python: Single Server",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/algorithm2/server2.py",
+            "console": "integratedTerminal",
+            "args": ["1",
+                "127.0.0.99", 
+                "33100", 
+                "../data/run-1-1-n50.csv", 
+                "-c", "../config/config1-n15.json", 
+                "-api", "https://acmonitor.azurewebsites.net", 
+                "-e", "-en", "0", "-ei", "1"],
             "cwd": "${workspaceFolder}/algorithm1"
         },
         {

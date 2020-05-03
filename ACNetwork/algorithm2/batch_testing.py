@@ -2,7 +2,7 @@ import subprocess
 
 NODES = 5
 
-for i in range(1,3):
+for i in range(1,7):
     for j in range(1,6):
 
         # Default topology
