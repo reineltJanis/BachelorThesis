@@ -1,6 +1,8 @@
 function updateTrace(div, traces, lastIterations) {
-  if (typeof div === "string") div = document.getElementById(div);
-  console.log(lastIterations)
+  if (typeof div === "string") {
+    div = document.getElementById(div);
+  }
+  // console.log(lastIterations)
   if (!div.data) {
     if (traces) {
       Plotly.newPlot(div, traces);
@@ -14,7 +16,7 @@ function updateTrace(div, traces, lastIterations) {
     return;
   }
   traces.forEach((trace, index) => {
-    console.log(trace);
+    // console.log(trace);
     let position = div.data.indexOf(
       div.data.find((t) => t["name"] === trace["name"])
     );

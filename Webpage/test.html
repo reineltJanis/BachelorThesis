@@ -20,6 +20,7 @@
     <div id="chart3" style="width: 100%;"></div>
     <div id="statistics" style="width: 100%;"></div>
     <div id="convergence-rate" style="width: 100%;"></div>
+    <div id="container"></div>
 
     <script>
         // const API_BASE_ADDRESS = 'https://acmonitor.azurewebsites.net/api/'
@@ -27,56 +28,90 @@
 
 
         let div = document.getElementById('chart3');
+        div.retrievingData = false;
+
+        const markerPlStart = "pl_start";
+        const markerPlStop = "pl_stop";
+        const markerSgStart = "sg_start";
+        const markerSgStop = "sg_stop";
+
+        var stop_measure_plotly = false
+        var stop_measure_sigma = false
+
+        setTimeout(() => {
+            console.log(performance.getEntriesByType('measure'));
+
+            performance.clearMarks();
+            performance.clearMeasures();
+        }, 30000);
+
+        // performance.mark("start");
 
         setInterval(function x() {
-            fetch(API_BASE_ADDRESS + 'analytics/plotly/1/240', {
+            let div = document.getElementById('chart3');
+            if (div.retrievingData) {
+                return;
+            }
+            performance.mark(markerPlStart);
+            div.retrievingData = true;
+            fetch(API_BASE_ADDRESS + 'analytics/plotly/1/400', {
                 method: 'post',
                 body: JSON.stringify(div.lastIterations)
-            }).then(data => { console.log(data); return data.text(); })
+            }).then(data => { return data.text(); })
                 .then(data => {
                     data = JSON.parse(data);
-                    updateTrace('chart3', data.data, data.lastIterations);
+                    updateTrace(div, data.data, data.lastIterations);
                     updateTrace('statistics', data.statistics, null);
+                    div.retrievingData = false;
+
+                    performance.mark(markerPlStop);
+
+                    if (!stop_measure_plotly) {
+                        stop_measure_plotly = true
+                        performance.measure("from start to pl_end", undefined, markerPlStop)
+                        performance.measure("from pl_start to pl_end", markerPlStart, markerPlStop)
+                    }
                 });
             return x;
         }(), 5000);
 
-    </script>
+        //////  SIGMA CODE
 
-
-
-    <div id="container"></div>
-
-
-    <script>
-        // s = sigma.parsers.json('data.json', {
-        //     container: 'container',
-        //     settings: {
-        //         defaultNodeColor: '#ec5148'
-        //     }
-        // });
-
-        function loadGraph(div) {
-            if (typeof div === "string") div = document.getElementById(div);
+        function loadGraph() {
 
             setInterval(function x() {
-                fetch(API_BASE_ADDRESS + 'analytics/sigma/1/240')
-                    .then(data => data.status === 200 ? data.json() : {})
-                    .then(data => showGraph(div, data));
+
+                div = document.getElementById('container');
+
+                if (div.retrievingData) {
+                    return;
+                }
+                div.retrievingData = true;
+                performance.mark("sg_start");
+                fetch(API_BASE_ADDRESS + 'analytics/sigma/1/400')
+                    .then(data => data.text())
+                    .then(body => {
+                        showGraph(div, JSON.parse(body));
+                        div.retrievingData = false;
+
+                        performance.mark("sg_stop");
+                        if (!stop_measure_sigma) {
+                            stop_measure_sigma = true;
+                            performance.measure("from start to sg_end", undefined, markerSgStop);
+                            performance.measure("from sg_start to sg_end", markerSgStart, markerSgStop);
+                        }
+                    });
                 return x;
             }(), 10000)
         }
 
-        loadGraph('container')
+        loadGraph('container');
 
-
-
-        // fetch(API_BASE_ADDRESS + 'analytics/graph/4/240').then(data => data.status === 200 ? data.json() : {}).then(data => showGraph(data))
 
         function showGraph(div, data) {
             if (typeof div === "string") div = document.getElementById(div);
 
-            console.log(data)
+            // console.log(data)
             if (!div || !data.nodes.length) { return; }
 
             if (!div.sigInstance) {
@@ -96,7 +131,7 @@
                 });
 
                 div.sigInstance.startForceAtlas2({ worker: true, barnesHutOptimize: false });
-                setTimeout(() => div.sigInstance.stopForceAtlas2(), 1000)
+                setTimeout(() => div.sigInstance.stopForceAtlas2(), 200)
                 return;
             }
 
